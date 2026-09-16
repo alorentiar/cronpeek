@@ -16,24 +16,27 @@ public class CronPeek {
             return;
         }
 
-        // Accepts either a quoted single argument or the 5 fields split by the shell.
-        String expr;
+        // Either one quoted argument holds the whole expression, or the shell
+        // handed us the five fields separately.
         int count = 5;
         ZoneId zone = ZoneId.systemDefault();
         LocalDateTime base = null;
 
-        int i = 0;
-        if (args.length >= 5 && !args[0].startsWith("-")) {
+        String quoted = args[0];
+        boolean singleArg = !quoted.startsWith("-") && quoted.trim().split("\\s+").length == 5;
+        String expr;
+        int i;
+        if (singleArg) {
+            expr = quoted;
+            i = 1;
+        } else {
             StringBuilder sb = new StringBuilder();
-            for (int k = 0; k < 5; k++) {
+            for (int k = 0; k < 5 && k < args.length; k++) {
                 if (k > 0) sb.append(' ');
                 sb.append(args[k]);
             }
             expr = sb.toString();
-            i = 5;
-        } else {
-            expr = args[0];
-            i = 1;
+            i = Math.min(5, args.length);
         }
 
         for (; i < args.length; i++) {
